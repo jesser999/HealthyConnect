@@ -68,214 +68,211 @@ enum ProfileVisibility {
 // --------------------
 
 model User {
-  id                Int              @id @default(autoincrement())
-  email             String           @unique
-  password          String
-  role              UserRole
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      UserRole
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  doctorProfile     DoctorProfile?
-  patientProfile    PatientProfile?
-  notifications     Notification[]
-  messagesSent      Message[]        @relation("MessagesSent")
-  messagesReceived  Message[]        @relation("MessagesReceived")
-  files             File[]
-  userSettings      UserSettings?
-
+  doctorProfile    DoctorProfile?
+  patientProfile   PatientProfile?
+  notifications    Notification[]
+  messagesSent     Message[]       @relation("MessagesSent")
+  messagesReceived Message[]       @relation("MessagesReceived")
+  files            File[]
+  userSettings     UserSettings?
 }
 
-
-
 model DoctorProfile {
-  id                Int                  @id @default(autoincrement())
-  userId            Int                  @unique
-  firstName         String
-  lastName          String
-  photoId           Int?                 @unique
-  professionalBio   String?              @db.Text
-  specialization    String
-  yearsExperience   Int
-  medicalLicense    String
-  officeAddress     String?
-  city              String?
-  state             String?
-  zipCode           String?
-  phoneNumber       String?
-  emergencyContact  String?
-  availability      Json
-  avgReview         Float?               @default(0)
+  id               Int     @id @default(autoincrement())
+  userId           Int     @unique
+  firstName        String
+  lastName         String
+  photoId          Int?    @unique
+  professionalBio  String? @db.Text
+  specialization   String
+  yearsExperience  Int
+  medicalLicense   String
+  officeAddress    String?
+  city             String?
+  state            String?
+  zipCode          String?
+  phoneNumber      String?
+  emergencyContact String?
+  availability     Json
+  avgReview        Float?  @default(0)
 
-  user              User                 @relation(fields: [userId], references: [id])
-  photo             File?                @relation("DoctorPhoto", fields: [photoId], references: [id])
-  appointments      Appointment[]
-  reviews           Review[]
-  certifications    DoctorCertification[]
+  user           User                  @relation(fields: [userId], references: [id])
+  photo          File?                 @relation("DoctorPhoto", fields: [photoId], references: [id])
+  appointments   Appointment[]
+  reviews        Review[]
+  certifications DoctorCertification[]
 }
 
 model DoctorCertification {
-  id              Int           @id @default(autoincrement())
+  id              Int @id @default(autoincrement())
   doctorProfileId Int
   fileId          Int
 
-  doctorProfile   DoctorProfile @relation(fields: [doctorProfileId], references: [id])
-  file            File          @relation(fields: [fileId], references: [id])
+  doctorProfile DoctorProfile @relation(fields: [doctorProfileId], references: [id])
+  file          File          @relation(fields: [fileId], references: [id])
 
   @@unique([doctorProfileId, fileId])
 }
 
 model PatientProfile {
-  id                Int              @id @default(autoincrement())
-  userId            Int              @unique
-  firstName         String
-  lastName          String
-  photoId           Int?             @unique
-  phoneNumber       String?
-  dateOfBirth       DateTime?
-  address           String?
-  city              String?
-  state             String?
-  zipCode           String?
-  medicalHistory    String?          @db.Text
+  id             Int       @id @default(autoincrement())
+  userId         Int       @unique
+  firstName      String
+  lastName       String
+  photoId        Int?      @unique
+  phoneNumber    String?
+  dateOfBirth    DateTime?
+  address        String?
+  city           String?
+  state          String?
+  zipCode        String?
+  medicalHistory String?   @db.Text
 
-  user              User             @relation(fields: [userId], references: [id])
-  photo             File?            @relation("PatientPhoto", fields: [photoId], references: [id])
-  appointments      Appointment[]
-  reviews           Review[]
-  medicalRecords    MedicalRecord[]
+  user           User            @relation(fields: [userId], references: [id])
+  photo          File?           @relation("PatientPhoto", fields: [photoId], references: [id])
+  appointments   Appointment[]
+  reviews        Review[]
+  medicalRecords MedicalRecord[]
 }
 
 model Appointment {
-  id            Int               @id @default(autoincrement())
-  doctorId      Int
-  patientId     Int
-  date          DateTime
-  status        AppointmentStatus
-  type          ConsultationType
-  reason        String?           @db.Text
-  notes         String?           @db.Text
-  recordingId   Int?             @unique
-  createdAt     DateTime         @default(now())
+  id          Int               @id @default(autoincrement())
+  doctorId    Int
+  patientId   Int
+  date        DateTime
+  status      AppointmentStatus
+  type        ConsultationType
+  reason      String?           @db.Text
+  notes       String?           @db.Text
+  recordingId Int?              @unique
+  createdAt   DateTime          @default(now())
 
-  doctor        DoctorProfile    @relation(fields: [doctorId], references: [id])
-  patient       PatientProfile   @relation(fields: [patientId], references: [id])
-  recording     File?            @relation("AppointmentRecording", fields: [recordingId], references: [id])
-  messages      Message[]
-  reviews       Review[]
+  doctor    DoctorProfile  @relation(fields: [doctorId], references: [id])
+  patient   PatientProfile @relation(fields: [patientId], references: [id])
+  recording File?          @relation("AppointmentRecording", fields: [recordingId], references: [id])
+  messages  Message[]
+  reviews   Review[]
 }
 
 model Message {
-  id            Int          @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   senderId      Int
   receiverId    Int
   appointmentId Int?
-  content       String?      @db.Text
+  content       String?     @db.Text
   type          MessageType
   fileId        Int?
-  isRead        Boolean      @default(false)
-  createdAt     DateTime     @default(now())
+  isRead        Boolean     @default(false)
+  createdAt     DateTime    @default(now())
 
-  sender        User         @relation("MessagesSent", fields: [senderId], references: [id])
-  receiver      User         @relation("MessagesReceived", fields: [receiverId], references: [id])
-  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
-  file          File?        @relation(fields: [fileId], references: [id])
-  videoCall     VideoCall?   @relation("MessageVideoCall")
+  sender      User         @relation("MessagesSent", fields: [senderId], references: [id])
+  receiver    User         @relation("MessagesReceived", fields: [receiverId], references: [id])
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
+  file        File?        @relation(fields: [fileId], references: [id])
+  videoCall   VideoCall?   @relation("MessageVideoCall")
 }
 
 model VideoCall {
-  id        Int         @id @default(autoincrement())
-  messageId Int         @unique
-  status    CallStatus  @default(PENDING)
+  id        Int        @id @default(autoincrement())
+  messageId Int        @unique
+  status    CallStatus @default(PENDING)
   startTime DateTime?
   endTime   DateTime?
-  roomId    String      @unique
-  createdAt DateTime    @default(now())
+  roomId    String     @unique
+  createdAt DateTime   @default(now())
 
-  message   Message     @relation("MessageVideoCall", fields: [messageId], references: [id])
+  message Message @relation("MessageVideoCall", fields: [messageId], references: [id])
 }
 
 model Review {
-  id            Int            @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   doctorId      Int
   patientId     Int
   appointmentId Int?
   rating        Int
-  comment       String?        @db.Text
-  createdAt     DateTime       @default(now())
+  comment       String?  @db.Text
+  createdAt     DateTime @default(now())
 
-  doctor        DoctorProfile  @relation(fields: [doctorId], references: [id])
-  patient       PatientProfile @relation(fields: [patientId], references: [id])
-  appointment   Appointment?   @relation(fields: [appointmentId], references: [id])
+  doctor      DoctorProfile  @relation(fields: [doctorId], references: [id])
+  patient     PatientProfile @relation(fields: [patientId], references: [id])
+  appointment Appointment?   @relation(fields: [appointmentId], references: [id])
 }
 
 model MedicalRecord {
-  id          Int            @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   patientId   Int
   title       String
-  description String?        @db.Text
-  fileId      Int?          @unique
-  createdAt   DateTime      @default(now())
+  description String?  @db.Text
+  fileId      Int?     @unique
+  createdAt   DateTime @default(now())
 
-  patient     PatientProfile @relation(fields: [patientId], references: [id])
-  file        File?          @relation("MedicalRecordFile", fields: [fileId], references: [id])
+  patient PatientProfile @relation(fields: [patientId], references: [id])
+  file    File?          @relation("MedicalRecordFile", fields: [fileId], references: [id])
 }
 
 model File {
-  id          Int               @id @default(autoincrement())
-  ownerId     Int
-  url         String
-  filename    String?
+  id           Int      @id @default(autoincrement())
+  ownerId      Int
+  url          String
+  filename     String?
   originalname String?
-  mimetype    String?
-  size        Int?
-  fileType    FileType
-  createdAt   DateTime          @default(now())
+  mimetype     String?
+  size         Int?
+  fileType     FileType
+  createdAt    DateTime @default(now())
 
-  owner               User                 @relation(fields: [ownerId], references: [id])
-  appointmentRecording Appointment?        @relation("AppointmentRecording")
-  doctorProfile        DoctorProfile?      @relation("DoctorPhoto")
-  patientProfile       PatientProfile?     @relation("PatientPhoto")
+  owner                User                  @relation(fields: [ownerId], references: [id])
+  appointmentRecording Appointment?          @relation("AppointmentRecording")
+  doctorProfile        DoctorProfile?        @relation("DoctorPhoto")
+  patientProfile       PatientProfile?       @relation("PatientPhoto")
   messages             Message[]
-  medicalRecord        MedicalRecord?      @relation("MedicalRecordFile")
+  medicalRecord        MedicalRecord?        @relation("MedicalRecordFile")
   doctorCertifications DoctorCertification[]
 }
 
 model Notification {
-  id        Int               @id @default(autoincrement())
+  id        Int              @id @default(autoincrement())
   userId    Int
   type      NotificationType
   content   String           @db.Text
   isRead    Boolean          @default(false)
   createdAt DateTime         @default(now())
 
-  user      User             @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model UserSettings {
-  id                    Int      @id @default(autoincrement())
-  userId                Int      @unique
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
-  // Notification settings
-  emailNotifications    Boolean  @default(true)
-  smsNotifications      Boolean  @default(false)
-  pushNotifications     Boolean  @default(true)
-  appointmentReminders  Boolean  @default(true)
-  messageNotifications  Boolean  @default(true)
-  healthTips            Boolean  @default(false)
-  marketingEmails       Boolean  @default(false)
-  
-  // Privacy settings
-  profileVisibility     ProfileVisibility @default(DOCTORS_ONLY)
-  shareMedicalHistory   Boolean  @default(true)
-  allowDataAnalytics    Boolean  @default(false)
-  shareForResearch      Boolean  @default(false)
-  
-  // Security settings
-  twoFactorAuth         Boolean  @default(false)
-  sessionTimeout        Int      @default(30)
-  loginNotifications    Boolean  @default(true)
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user                  User     @relation(fields: [userId], references: [id])
+  // Notification settings
+  emailNotifications   Boolean @default(true)
+  smsNotifications     Boolean @default(false)
+  pushNotifications    Boolean @default(true)
+  appointmentReminders Boolean @default(true)
+  messageNotifications Boolean @default(true)
+  healthTips           Boolean @default(false)
+  marketingEmails      Boolean @default(false)
+
+  // Privacy settings
+  profileVisibility   ProfileVisibility @default(DOCTORS_ONLY)
+  shareMedicalHistory Boolean           @default(true)
+  allowDataAnalytics  Boolean           @default(false)
+  shareForResearch    Boolean           @default(false)
+
+  // Security settings
+  twoFactorAuth      Boolean @default(false)
+  sessionTimeout     Int     @default(30)
+  loginNotifications Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id])
 }
